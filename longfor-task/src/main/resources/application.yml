@@ -1,0 +1,3 @@
+shopping:
+  plugin:
+    task: com.longfor.shopping.plugin.task.demo

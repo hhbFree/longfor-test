@@ -1,0 +1,17 @@
+order:
+  shop:
+    plugin:
+      strategy:
+        pattern: /**/*.class
+        url:
+          - com.longfor.shopping.common
+      chain:
+        c1-1:
+          - order
+          - payment
+        c1-2:
+          - payment
+          - order
+        c2:
+          - payment
+          - order

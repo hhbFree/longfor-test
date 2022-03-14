@@ -1,0 +1,3 @@
+shopping:
+  plugin:
+    mq: com.longfor.shopping.plugin.mq.demo
