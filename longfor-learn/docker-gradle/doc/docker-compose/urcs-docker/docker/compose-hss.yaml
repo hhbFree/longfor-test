@@ -1,0 +1,69 @@
+# yaml 配置实例
+version: "3.8"
+
+services:
+  u5gc-udr:
+    container_name: "u5gc-udr"
+    image: "${docker_repo}/u5gc-udr:1.0.0-2012231143"
+    privileged: true
+    environment:
+      XGCDB_URL: "${PRIVATE_IP}:3309"
+      AF_IP: "127.0.0.1"
+      MNC: "00"
+    ports:
+      - "29504:29504"
+    network_mode: "bridge"
+    restart: always
+    depends_on:
+      - mysql-udr
+
+  u5gc-udm:
+    container_name: "u5gc-udm"
+    image: "${docker_repo}/u5gc-udm:1.0.0-2012231143"
+    privileged: true
+    ports:
+      - "5868:5868"
+      - "29503:29503"
+      - "5005:5005"
+    network_mode: "bridge"
+    restart: always
+    depends_on:
+      - u5gc-udr
+
+  mysql-udr:
+    container_name: "mysql-udr"
+    image: "${docker_repo}/mysql-udr:1.0"
+    privileged: true
+    environment:
+      MYSQL_ROOT_PASSWORD: urcs@2018
+    ports:
+      - "3309:3306"
+    network_mode: "bridge"
+    restart: always
+
+  mpt-admin:
+    container_name: "mpt-admin"
+    image: "${docker_repo}/mpt-admin:20201221154331"
+    privileged: true
+    ports:
+      - "8092:8092"
+    network_mode: "bridge"
+    restart: always
+    depends_on:
+      - mp-admin
+
+  mp-admin:
+    container_name: "mp-admin"
+    image: "${docker_repo}/mp-admin:3.0.0-2012211605"
+    privileged: true
+    environment:
+      AUTH_ENABLE: "false"
+      udmUrl: "http://${PRIVATE_IP}:29503"
+      DB_HOST: "${PRIVATE_IP}:3309"
+      ccf: kafka
+    ports:
+      - "8091:8091"
+    network_mode: "bridge"
+    restart: always
+    depends_on:
+      - mysql-udr

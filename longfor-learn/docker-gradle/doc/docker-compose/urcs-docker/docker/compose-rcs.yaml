@@ -1,0 +1,113 @@
+# yaml 配置实例
+version: "3.8"
+
+services:
+  rcs-mysql:
+    container_name: "rcs-mysql"
+    image: "${docker_repo}/rcs-mysql:${tag_rcs_mysql}"
+    env_file: .env
+    privileged: true
+    environment:
+      MYSQL_ROOT_PASSWORD: urcs@2018
+    ports:
+      - "${RCS_DB_PORT}:3306"
+    network_mode: "bridge"
+    restart: always
+
+  urcs-as-group:
+    container_name: "urcs-as-group"
+    image: "${docker_repo}/urcs-as-group:${tag_urcs_as_group}"
+    env_file: .env
+    privileged: true
+    network_mode: "host"
+    command: -d ${debug_group}
+    restart: always
+    extra_hosts:
+      - "ZK_HOST:${ZK_IP}"
+    volumes:
+      - ~/logs/data/log/urcs-as-group:/data/log/urcs-as-group
+
+  urcs-as-nfs:
+    container_name: "urcs-as-nfs"
+    image: "${docker_repo}/urcs-as-nfs:${tag_urcs_as_nfs}"
+    env_file: .env
+    privileged: true
+    network_mode: "host"
+    restart: always
+    volumes:
+      - ~/logs/data/log/urcs-as-nfs:/data/log/urcs-as-nfs
+    command: -d ${debug_nfs}
+
+  urcs-as-maap:
+    container_name: "urcs-as-maap"
+    image: "${docker_repo}/urcs-as-maap:${tag_urcs_as_maap}"
+    env_file: .env
+    privileged: true
+    network_mode: "host"
+    command: -d ${debug_maap}
+    restart: always
+    volumes:
+      - ~/logs/data/log/urcs-as-maap:/data/log/urcs-as-maap
+
+  urcs-as-dm:
+    container_name: "urcs-as-dm"
+    image: "${docker_repo}/urcs-as-dm:${tag_urcs_as_dm}"
+    env_file: .env
+    privileged: true
+    network_mode: "host"
+    command: -d ${debug_dm}
+    restart: always
+    volumes:
+      - ~/logs/data/log/urcs-as-dm:/data/log/urcs-as-dm
+
+  urcs-as-tas:
+    container_name: "urcs-as-tas"
+    image: "${docker_repo}/urcs-as-tas:${tag_urcs_as_tas}"
+    env_file: .env
+    privileged: true
+    network_mode: "host"
+    command: -d ${debug_tas}
+    restart: always
+    extra_hosts:
+      - "ZK_HOST:${ZK_IP}"
+    volumes:
+      - ~/logs/data/log/urcs-as-tas:/data/log/urcs-as-tas
+
+#IP Centrex ----------------------------------------------------------
+  urcs-as-centrex:
+    container_name: "urcs-as-centrex"
+    image: "${docker_repo}/urcs-as-centrex:${tag_urcs_as_centrex}"
+    env_file: .env
+    privileged: true
+    network_mode: "host"
+    command: -d ${debug_ctx}
+    restart: always
+    extra_hosts:
+      - "ZK_HOST:${ZK_IP}"
+    volumes:
+      - ~/logs/data/log/urcs-as-centrex:/data/log/urcs-as-centrex
+
+  urcs-ctxdb:
+    container_name: "urcs-ctxdb"
+    image: "${docker_repo}/urcs-ctxdb:${tag_urcs_ctxdb}"
+    privileged: true
+    environment:
+      MYSQL_ROOT_PASSWORD: urcs@2018
+    ports:
+      - "${CTX_DB_PORT}:3306"
+    network_mode: "bridge"
+    restart: always
+#-------------------------------------------------------------------
+
+## 安装 docker-compose
+##    sudo curl -L "https://github.com/docker/compose/releases/download/1.26.2/docker-compose-$(uname -s)-$(uname -m)" -o /usr/local/bin/docker-compose
+##    sudo chmod +x /usr/local/bin/docker-compose
+##  创建软链
+##    sudo ln -s /usr/local/bin/docker-compose /usr/bin/docker-compose
+##    docker-compose --version
+## 
+# mkdir docker-compose
+# docker-compose -f compose-base.yaml compose-ims.yaml compose-rcs.yaml up -d
+# docker-compose -f compose-base.yaml compose-ims.yaml compose-rcs.yaml stop
+# docker-compose -f compose-base.yaml compose-ims.yaml compose-rcs.yaml start
+# docker-compose -f compose-base.yaml compose-ims.yaml compose-rcs.yaml restart

@@ -1,0 +1,100 @@
+buildscript {
+    project.ext {
+
+        if (!project.hasProperty("nexusUser")) {
+            nexusUser = 'admin'
+        }
+        if (!project.hasProperty("nexusPass")) {
+            nexusPass = 'urcs'
+        }
+        nexusRoot = 'http://172.16.157.64:8081/repository'
+        privateRepo = { return { url "${nexusRoot}/maven-public/" } }
+        uploadRepo = { project ->
+            return {
+                url "$nexusRoot/${project.version.endsWith('-SNAPSHOT') ? 'maven-snapshots' : 'maven-releases'}"
+                credentials { username nexusUser; password nexusPass }
+            }
+        }
+        repoClosure = {
+            mavenLocal()
+
+            maven { url "http://172.16.157.64:8081/repository/maven-public/"                 }
+            maven { url "http://maven.aliyun.com/nexus/content/groups/public/" }
+
+            mavenCentral()
+
+        }
+        dependencies {
+            classpath 'org.hidetake:gradle-ssh-plugin:2.9.0'
+        }
+        versionTail = new Date().format('yyMMddHHmm')
+    }
+    repositories repoClosure
+}
+
+allprojects
+        { project ->
+
+            project.repositories rootProject.repoClosure
+
+            group = 'org.helium'
+            version = "4.0.0.${versionTail}"
+        }
+
+def mavenPublishIgnoreList = ['helium-sample']
+
+subprojects { project ->
+
+    apply plugin: 'java'
+
+    apply plugin: 'maven-publish'
+
+    apply plugin: 'org.hidetake.ssh'
+
+    tasks.withType(JavaCompile) {
+        sourceCompatibility = 1.8
+        options.encoding = "UTF-8"
+    }
+
+    tasks.withType(Test) {
+        defaultCharacterEncoding = "UTF-8"
+    }
+
+    dependencies {
+        testCompile "junit:junit:$junit_version"
+        testCompile "cn.hutool:hutool-all:$hutool_version"
+    }
+
+
+    task sourceJar(type: Jar) {
+        from sourceSets.main.allJava
+        classifier = 'sources'
+    }
+
+    if (!(project.name in mavenPublishIgnoreList)) {
+        publishing {
+            repositories {
+                maven uploadRepo(project)
+            }
+            publications {
+                maven(MavenPublication) {
+                    from components.java
+                    artifact sourceJar
+                }
+            }
+        }
+    }
+
+    ssh.settings {
+        knownHosts = allowAnyHosts
+    }
+
+    remotes {
+        imsServer {
+            host = ims_server_host
+            port = Integer.parseInt(ims_server_port)
+            user = ims_server_user
+            password = ims_server_password
+        }
+    }
+}

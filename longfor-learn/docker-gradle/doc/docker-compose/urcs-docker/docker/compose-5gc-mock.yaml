@@ -1,0 +1,35 @@
+# yaml 配置实例
+version: "3.8"
+
+services:
+  u5gc-udr:
+    container_name: "u5gc-udr"
+    image: "${docker_repo}/u5gc-udr:1.0.0-2009021506"
+    privileged: true
+    environment:
+      XGCDB_URL: "${PRIVATE_IP}:3309"
+    ports:
+      - "29504:29504"
+    network_mode: "bridge"
+    restart: always
+
+  u5gc-udm:
+    container_name: "u5gc-udm"
+    image: "${docker_repo}/u5gc-udm:1.0.0-2009021627"
+    privileged: true
+    ports:
+      - "5868:5868"
+      - "29503:29503"
+    network_mode: "bridge"
+    restart: always
+
+  mysql-udr:
+    container_name: "mysql-udr"
+    image: "${docker_repo}/ims-mysql:${tag_ims_mysql}"
+    privileged: true
+    environment:
+      MYSQL_ROOT_PASSWORD: urcs@2018
+    ports:
+      - "3309:3306"
+    network_mode: "bridge"
+    restart: always

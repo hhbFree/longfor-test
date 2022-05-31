@@ -1,0 +1,81 @@
+# yaml 配置实例
+version: "3.8"
+
+services:
+  ims-redis:
+    container_name: "ims-redis"
+    image: "redis:3.2"
+    privileged: true
+    ports:
+      - "${RD_PORT}:6379"
+    network_mode: "bridge"
+    restart: always
+
+  ims-zookeeper:
+    container_name: "ims-zookeeper"
+    image: "zookeeper:3.5"
+    privileged: true
+    ports:
+      - "${ZK_PORT}:2181"
+    network_mode: "bridge"
+    restart: always
+
+  ims-mysql:
+    container_name: "ims-mysql"
+    image: "${docker_repo}/ims-mysql:${tag_ims_mysql}"
+    env_file: .env
+    privileged: true
+    environment:
+      MYSQL_ROOT_PASSWORD: urcs@2018
+    ports:
+      - "${IMS_DB_PORT}:3306"
+    network_mode: "bridge"
+    restart: always
+
+  ims-fastdfs-tracker:
+    container_name: "ims-fastdfs-tracker"
+    image: "${docker_repo}/urcs/fastdfs_tracker:4.08"
+    env_file: .env
+    privileged: true
+    command: tracker
+    ports:
+      - "${TRACKERS_PORT}:22122"
+    network_mode: "host"
+    restart: always
+
+  ims-fastdfs-storage:
+    container_name: "ims-fastdfs-storage"
+    image: "${docker_repo}/urcs/fastdfs_storage:4.08"
+    env_file: .env
+    privileged: true
+    command: storage
+    environment:
+      TRACKER_SERVER: "${FASTDFS_TRACKERS}"
+    ports:
+      - "${STORAGES_PORT}:23000"
+      - "8888:8888"
+    network_mode: "host"
+    restart: always
+    depends_on:
+      - ims-fastdfs-tracker
+
+
+
+## 安装 docker-compose
+##    sudo curl -L "https://github.com/docker/compose/releases/download/1.26.2/docker-compose-$(uname -s)-$(uname -m)" -o /usr/local/bin/docker-compose
+##    sudo chmod +x /usr/local/bin/docker-compose
+##  创建软链
+##    sudo ln -s /usr/local/bin/docker-compose /usr/bin/docker-compose
+##    docker-compose --version
+## 
+# mkdir docker-compose
+# 创建并运行
+# docker-compose -f compose-base.yaml up -d
+# 停止
+# docker-compose -f compose-base.yaml stop
+# 启动
+# docker-compose -f compose-base.yaml start
+# 重启
+# docker-compose -f compose-base.yaml restart
+# 卸载
+# docker-compose -f compose-base.yaml down

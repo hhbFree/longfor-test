@@ -1,0 +1,52 @@
+# yaml 配置实例
+version: "3.8"
+
+services:
+  urcs-as-sbc:
+    container_name: "urcs-as-sbc"
+    image: "${docker_repo}/urcs-as-sbc:${tag_urcs_as_sbc}"
+    env_file: .env
+    privileged: true
+    volumes:
+      - ~/logs/data/log/urcs-as-sbc:/data/log/urcs-as-sbc
+#      - ~/config/auto/urcs-as-sbc/application-dev.yml:/home/urcs-as-sbc/application-dev.yml
+    network_mode: "host"
+    restart: always
+    command: -d ${debug_sbc}
+
+  urcs-as-cscf:
+    container_name: "urcs-as-cscf"
+    image: "${docker_repo}/urcs-as-cscf:${tag_urcs_as_cscf}"
+    env_file: .env
+    privileged: true
+    volumes:
+      - ~/logs/data/log/urcs-as-cscf:/data/log/urcs-as-cscf
+    network_mode: "host"
+    restart: always
+    command: -d ${debug_cscf}
+    extra_hosts:
+      - "ZK_HOST:${ZK_IP}"
+      - "${hostname}:127.0.0.1"
+
+  urcs-as-im:
+    container_name: "urcs-as-im"
+    image: "${docker_repo}/urcs-as-im:${tag_urcs_as_im}"
+    env_file: .env
+    privileged: true
+    volumes:
+      - ~/logs/data/log/urcs-as-im:/data/log/urcs-as-im
+    network_mode: "host"
+    restart: always
+    command: -d ${debug_im} -x ${im_jvm_xmx} -s ${im_jvm_xms} -p "${im_jvm_opt}"
+    extra_hosts:
+      - "ZK_HOST:${ZK_IP}"
+
+# docker-compose -f compose-ims.yaml up -d urcs-as-sbc
+# docker-compose -f compose-ims.yaml up -d
+# docker-compose -f compose-ims.yaml stop
+# docker-compose -f compose-ims.yaml start
+# docker-compose -f compose-ims.yaml restart
+# 问题
+# xgc@xgc:~/urcs-docker/docker$ docker-compose -f compose-ims.yaml up urcs-as-sbc
+# ERROR: Duplicate mount points: [/home/xgc/logs/data/log/urcs-as-sbc:/data/log/urcs-as-sbc:rw, /data/log/urcs-as-sbc]
+# 挂载目录没有权限，建议修改挂载目录。
