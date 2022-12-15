@@ -61,19 +61,20 @@ public class AsmTest {
 
 
         /**
-         * 8.computeIfAbsent 方法
+         * 8.computeIfAbsent 方法 不存在就更新，添加；存在不更新
          * 如果指定的key不存在，则通过指定的K -> V计算出新的值设置为key的值
          */
         System.out.println("------------------------------");
         map.computeIfAbsent("1",k->"new1");
         map.computeIfAbsent("2",k->"new2");
+        map.computeIfAbsent("9",k->"new2");
         map.forEach((k,v)->{
             System.out.println("k:"+k+"||"+"v:"+v);
         });
 
 
         /**
-         * 9.computeIfPresent 方法
+         * 9.computeIfPresent 方法   如果存在就更新，value为 null直接删除
          * 如果指定的key存在，则根据旧的key和value计算新的值newValue,
          * 如果newValue不为null，则设置key新的值为newValue,
          * 如果newValue为null, 则删除该key的值，
