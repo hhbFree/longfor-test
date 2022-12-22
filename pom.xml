@@ -17,6 +17,7 @@
         <module>longfor-auto</module>
         <module>longfor-asm</module>
         <module>longfor-excel</module>
+        <module>longfor-aqs</module>
     </modules>
 
     <parent>
